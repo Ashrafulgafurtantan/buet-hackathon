@@ -16,6 +16,7 @@
     "firebase-admin": "^11.0.1",
     "google-search-results-nodejs": "^2.1.0",
     "nodemon": "^2.0.19",
+    "redis": "^4.2.0",
     "spotify-web-api-node": "^5.0.2"
   }
 }

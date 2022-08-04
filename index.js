@@ -5,6 +5,7 @@ const SerpApi = require('google-search-results-nodejs')
 const search = new SerpApi.GoogleSearch('da928d7d6e6adddf831e5fe0da1d15b415f498e54361a6038d445efeb87bc4f9')
 const accessToken = '';
 const refreshToken = '';
+
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
@@ -16,6 +17,17 @@ admin.initializeApp({
 });
 const db = admin.firestore();
 const User = db.collection("users");
+
+const redis = require('redis')
+let client = redis.createClient({url: process.env['REDIS_URL']});
+client.connect();
+client.on('connect', function () {
+   console.log('[Redis Client] Connected!');
+});
+client.on('error', function (e) {
+   console.log('[Redis Client] '+ e);
+});
+
 
 /* SPOTIFY WEB API NODE */
 const scopes = [
