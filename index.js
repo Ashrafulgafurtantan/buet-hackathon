@@ -1,13 +1,21 @@
 const express = require('express');
 const app = express();
 const SpotifyWebApi = require('spotify-web-api-node');
-const SerpApi = require('google-search-results-nodejs')
+const SerpApi = require('google-search-results-nodejs');
+const passport = require('passport');
+const session = require('express-session');
 const search = new SerpApi.GoogleSearch('da928d7d6e6adddf831e5fe0da1d15b415f498e54361a6038d445efeb87bc4f9')
 const accessToken = '';
 const refreshToken = '';
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.use(session({
+   secret: 'secret',
+   resave:true,
+   saveUninitialized: true
+}));
 
+require('./passport');
 /*   FIREBASE INITIALIZE */
 const admin = require('firebase-admin');
 const credentials = require('./firebase-sdk.json');
@@ -17,6 +25,35 @@ admin.initializeApp({
 const db = admin.firestore();
 const User = db.collection("users");
 
+/*GOOGLE OAUTH2.0*/
+app.get('/logout',(req,res)=>{
+   if(req.session.loggedin){
+      req.session.destroy();
+      res.redirect('/');
+      res.end();
+   }else{
+      res.redirect('/');
+      res.end();
+   }
+});
+app.get('/google', passport.authenticate('google',{
+   scope:['email', 'profile']
+}));
+app.get('/google/callback',passport.authenticate('google',{
+   failureRedirect: "/",
+}),async (req,res)=>{
+   req.session.userData = {
+      profile:req.user.photos[0].value,
+      email:req.user.email
+   };
+   console.log(req.session.userData);
+   req.session.loggedin = true; 
+   res.redirect('/');
+   res.end();
+});
+app.get('/',(req,res)=>{
+   res.send("<h1>Home Page</h1>");
+})
 /* SPOTIFY WEB API NODE */
 const scopes = [
    'ugc-image-upload',
