@@ -16,6 +16,27 @@ app.use(session({
    saveUninitialized: true
 }));
 
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUI = require('swagger-ui-express');
+
+const swaggerOptions = {
+   swaggerDefinition: {
+      info: {
+         title: "First api",
+         description: "Hello test",
+         contact : {
+            name : "Jahid",
+         },
+         servers: ["http://localhost:8080"]
+      }
+   },
+   apis: ["index.js"]
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+
 require('./passport');
 /*   FIREBASE INITIALIZE */
 const admin = require('firebase-admin');
@@ -36,6 +57,16 @@ app.use(
     })
 );
 /*GOOGLE OAUTH2.0*/
+
+/**
+ * @swagger
+ * /logout:
+ *  get:
+ *    description: Logout from oAuth
+ *    responses:
+ *    '200':
+ *       description: A success response
+ */
 app.get('/logout',(req,res)=>{
    if(req.session.loggedin){
       req.session.destroy();
@@ -46,6 +77,15 @@ app.get('/logout',(req,res)=>{
       res.end();
    }
 });
+/**
+ * @swagger
+ * /google:
+ *  get:
+ *    description: Google OAuth
+ *    responses:
+ *    '200':
+ *       description: A success response
+ */
 app.get('/google', passport.authenticate('google',{
    scope:['email', 'profile']
 }));
@@ -107,7 +147,15 @@ const spotifyApi = new SpotifyWebApi({
 app.get('/login', (req,res)=>{
    res.redirect(spotifyApi.createAuthorizeURL(scopes));
 })
-
+/**
+ * @swagger
+ * /news:
+ *  get:
+ *    description: Get News
+ *    responses:
+ *    '200':
+ *       description: A success response
+ */
 app.get('/searchNews', async (req,res)=>{
    const query =  req.query.query;
    console.log(`query = ${query}`)
