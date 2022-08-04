@@ -5,6 +5,8 @@ const SerpApi = require('google-search-results-nodejs');
 const passport = require('passport');
 const session = require('express-session');
 const rateLimit = require("express-rate-limit");
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUI = require('swagger-ui-express');
 const search = new SerpApi.GoogleSearch('da928d7d6e6adddf831e5fe0da1d15b415f498e54361a6038d445efeb87bc4f9')
 const accessToken = '';
 const refreshToken = '';
@@ -16,16 +18,15 @@ app.use(session({
    saveUninitialized: true
 }));
 
-const swaggerJsDoc = require('swagger-jsdoc');
-const swaggerUI = require('swagger-ui-express');
-
 const swaggerOptions = {
    swaggerDefinition: {
+      openapi: "3.0.0",
       info: {
-         title: "First api",
-         description: "Hello test",
+         title: "Jar Assistant",
+         description: "Api documenattion for Jar Assistant keep-note open api",
+         version: "1.0.0",
          contact : {
-            name : "Jahid",
+            name : "Jar Assistant",
          },
          servers: ["http://localhost:8080"]
       }
@@ -147,14 +148,35 @@ const spotifyApi = new SpotifyWebApi({
 app.get('/login', (req,res)=>{
    res.redirect(spotifyApi.createAuthorizeURL(scopes));
 })
+
 /**
  * @swagger
- * /news:
+ * tags:
+ *    name: News
+ *    description: Search APIs
+ */
+
+/**
+ * @swagger
+ * /searchNews:
  *  get:
- *    description: Get News
+ *    tags: [News]
+ *    parameters:
+ *       -in: query
+ *       name: query
+ *       schema: 
+ *          type: string
+ *       required: true
+ *       description: Search parameter
+ *    description: API for searching news
  *    responses:
  *    '200':
  *       description: A success response
+ *       content:
+ *          application/json:
+ *             schema:
+ *                type: array
+ *                items: object
  */
 app.get('/searchNews', async (req,res)=>{
    const query =  req.query.query;
@@ -190,6 +212,37 @@ app.get('/callback', function(req, res) {
           console.log('Something went wrong!', err);
        });
 });
+
+/**
+ * @swagger
+ * tags:
+ *    name: Music
+ *    description: Search Music API
+ */
+
+/**
+ * @swagger
+ * /search:
+ *  get:
+ *    tags: [Music]
+ *    parameters:
+ *       -in: query
+ *       name: searchKey
+ *       schema: 
+ *          type: string
+ *       required: true
+ *       description: Search parameter
+ *    description: API for searching music
+ *    responses:
+ *    '200':
+ *       description: A success response
+ *       content:
+ *          application/json:
+ *             schema:
+ *                type: array
+ *                items: object
+ */
+
 app.get('/search',(req,res)=>{
    const requestParams = req.body.searchKey;
    console.log(requestParams)
@@ -217,6 +270,50 @@ app.post('/signup', async (req,res)=>{
    });
    res.json(userResponse);
 });
+
+/**
+ * @swagger
+ * tags:
+ *    name: Auth
+ *    description: Auth API
+ */
+
+/**
+ * @swagger
+ * /create:
+ *  post:
+ *    tags: [Auth]
+ *    description: API for searching music
+ *    requestBody:
+ *       required: true
+ *       content:
+ *          application/json
+ *             schema: 
+ *                type: object
+ *                required:
+ *                   - email
+ *                   - firstName
+ *                   - lastName
+ *                properties:
+ *                   email:
+ *                      type: string
+ *                      description: Email address for autheticatio
+ *                   firstName:
+ *                      type: string
+ *                      description: Firstname
+ *                   lastname:
+ *                      type: string
+ *                      description: Lastname
+ *    responses:
+ *    '200':
+ *       description: A success response
+ *       content:
+ *          application/json:
+ *             schema:
+ *                type: array
+ *                items: object
+ */
+
 
 app.post('/create', async(req,res)=>{
    try{
