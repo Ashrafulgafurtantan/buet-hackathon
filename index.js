@@ -4,6 +4,7 @@ const SpotifyWebApi = require('spotify-web-api-node');
 const SerpApi = require('google-search-results-nodejs');
 const passport = require('passport');
 const session = require('express-session');
+const rateLimit = require("express-rate-limit");
 const search = new SerpApi.GoogleSearch('da928d7d6e6adddf831e5fe0da1d15b415f498e54361a6038d445efeb87bc4f9')
 const accessToken = '';
 const refreshToken = '';
@@ -25,6 +26,15 @@ admin.initializeApp({
 const db = admin.firestore();
 const User = db.collection("users");
 
+/*RATE LIMITE*/
+app.use(
+    rateLimit({
+       windowMs:  10 * 1000, // 10 seconds duration in milliseconds
+       max: 2,
+       message: "You exceeded 3 requests in 10 seconds limit!",
+       headers: true,
+    })
+);
 /*GOOGLE OAUTH2.0*/
 app.get('/logout',(req,res)=>{
    if(req.session.loggedin){
@@ -47,13 +57,25 @@ app.get('/google/callback',passport.authenticate('google',{
       email:req.user.email
    };
    console.log(req.session.userData);
-   req.session.loggedin = true; 
+   req.session.loggedin = true;
    res.redirect('/');
    res.end();
 });
 app.get('/',(req,res)=>{
    res.send("<h1>Home Page</h1>");
-})
+});
+app.get('/a',(req,res)=>{
+   res.send("<h1>A Page</h1>");
+});
+
+app.get('/b',(req,res)=>{
+   res.send("<h1>B Page</h1>");
+});
+
+app.get('/c',(req,res)=>{
+   res.send("<h1>C Page</h1>");
+});
+
 /* SPOTIFY WEB API NODE */
 const scopes = [
    'ugc-image-upload',
@@ -91,7 +113,6 @@ app.get('/searchNews', async (req,res)=>{
    console.log(`query = ${query}`)
    search.json({
       q: query,
-      tbm: "nws",
       location: "Bangladesh"
    }, (result) => {
       res.send(result);
@@ -117,9 +138,6 @@ app.get('/callback', function(req, res) {
           console.log('access token = ',accessToken);
           console.log('Refresh token = ',refreshToken);
           res.send("Successfully retrieve Access Token");
-         /* spotifyApi.searchTracks("Love").then(result=>{
-             console.log(result.body.tracks.items);
-          });*/
        }, function(err) {
           console.log('Something went wrong!', err);
        });
