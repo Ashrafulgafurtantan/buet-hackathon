@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 const SpotifyWebApi = require('spotify-web-api-node');
+const SerpApi = require('google-search-results-nodejs')
+const search = new SerpApi.GoogleSearch('da928d7d6e6adddf831e5fe0da1d15b415f498e54361a6038d445efeb87bc4f9')
 const accessToken = '';
 const refreshToken = '';
 app.use(express.json());
@@ -46,6 +48,19 @@ const spotifyApi = new SpotifyWebApi({
 app.get('/login', (req,res)=>{
    res.redirect(spotifyApi.createAuthorizeURL(scopes));
 })
+
+app.get('/searchNews', async (req,res)=>{
+   const query =  req.query.query;
+   console.log(`query = ${query}`)
+   search.json({
+      q: query,
+      tbm: "nws",
+      location: "Bangladesh"
+   }, (result) => {
+      res.send(result);
+   })
+});
+
 app.get('/callback', function(req, res) {
    let code  = req.query['code'];
    let state  = req.query['state'];
